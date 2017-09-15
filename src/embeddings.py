@@ -81,4 +81,6 @@ def produceEmbeddings(train_data, test_data):
 def avg_feature_vector(sentences, model, k):
     """ Concatenates all words vector in a given sentence """
 
-    return np.array([np.concatenate([model[w] for w in words if w in model] or [np.zeros(k)], axis=0) for words in sentences])
+    train = np.stack([np.stack([model[word] for word in sentence if word in model] or [np.zeros(k)]) for sentence in sentences])
+    return train
+    #return np.array([np.concatenate([model[w] for w in words if w in model] or [np.zeros(k)], axis=0) for words in sentences])

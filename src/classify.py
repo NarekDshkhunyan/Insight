@@ -11,7 +11,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 METRICS_CHOICE = 'weighted'
 
 #-------------------------------------------------------------------------------------------------------------
-def classify(method, X_train, y_train, X_test, y_test, features, results):
+def classify(method, X_train, y_train, X_test, y_test, results):
     """ Runs the classification algorithm of the choice """
 
     #start = time.time()
@@ -59,9 +59,9 @@ def evaluate(y_test, y_predicted, results):
 results = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 results_random = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 
-input_file = "../Data/input_data.pkl"
+input_file = "../Data/input_embeddings.pkl"
 with open(input_file) as f:
-    X_train, X_test, y_train, y_test, features = cPickle.load(f)
+    X_train, X_test, y_train, y_test = cPickle.load(f)
 
 # Run the classification algorithm
-classify('rf', X_train, y_train, X_test, y_test, features, results)
+classify('svm', X_train, y_train, X_test, y_test, results)

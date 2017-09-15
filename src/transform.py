@@ -49,4 +49,4 @@ X_train, X_test, y_train, y_test = train_test_split(questions, labels, test_size
 
 # Get embeddings
 X_train, X_test = produceEmbeddings(X_train, X_test)
-# cPickle.dump([X_train, X_test, y_train, y_test, features], open('../Data/input_data.pkl', 'wb'))
+cPickle.dump([X_train, X_test, y_train, y_test], open('../Data/input_embeddings.pkl', 'wb'))
