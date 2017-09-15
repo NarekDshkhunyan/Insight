@@ -1,4 +1,5 @@
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from collections import defaultdict
 import numpy as np
 import cPickle
 from preprocess import load_data
@@ -9,6 +10,8 @@ NUM_FEATURES = 19
 data_file = "../Data/word2vec.pkl"
 with open(data_file) as f:
     word2vec = cPickle.load(f)
+
+k = len(word2vec.itervalues().next())
 
 
 # -------------------------------------------------------------------------------------------------------------
@@ -32,32 +35,50 @@ def tfidf(train_data, test_data):
     return train, test, tfidf_vectorizer
 
 
-def avg_feature_vector(sentences, model, NUM_FEATURES, tfidf_embeddings, tfidf_vec, k = 300):
-    # function to average all words vectors in a given paragraph
+def avg_feature_vector(sentences, model, NUM_FEATURES, k = 300):
+    """ Concatenates all words vector in a given sentence """
+
     featureVec = np.zeros((len(sentences), NUM_FEATURES * k), dtype="float32")
     for i in xrange(len(sentences)):
         for j in xrange(len(sentences[i])):
             sentence = sentences[i]
             word = sentence[j]
-            if word in model and word in tfidf_vec.vocabulary_:
-                a = tfidf_vec.vocabulary_[word]
-                #print a, word
-                featureVec[i][300*j:300*(j+1)] = model[word] * tfidf_embeddings[j, a]
+            if word in model:
+                featureVec[i][300*j:300*(j+1)] = model[word]
             else:
-                print word
+                #print word
                 featureVec[i][300*j:300*(j+1)] = np.random.uniform(-0.25, 0.25, k)
-                #featureVec[sentence][word] = model[word] * train_embeddings[word]
-        featureVec[i] = np.divide(featureVec[i], len(sentences[i]))
+        #featureVec[i] = np.divide(featureVec[i], len(sentences[i]))
 
     return featureVec
 
-train, test, tfidf_vectorizer = tfidf(train_data, test_data)
+
+def mean_embedding_vectorizer(sentences, model, tfidf_vec):
+    """ Averages all word vectors in a given sentence """
+
+    max_idf = max(tfidf_vec.idf_)
+    word2weight = defaultdict(lambda: max_idf, [(w, tfidf_vec.idf_[i]) for w, i in tfidf_vec.vocabulary_.items()])
+    return np.array([np.mean([model[w]*word2weight[w] for w in words if w in model] or [np.zeros(300)], axis=0) for words in sentences])
+
+
 # -------------------------------------------------------------------------------------------------------------
 def produceEmbeddings(train_data, test_data):
 
     train_sentences = load_data(train_data)
     test_sentences = load_data(test_data)
-    train_embeddings = avg_feature_vector(train_sentences, word2vec, NUM_FEATURES, train, tfidf_vectorizer, 300)
-    test_embeddings = avg_feature_vector(test_sentences, word2vec, NUM_FEATURES, test, tfidf_vectorizer, 300)
+
+    train, test, tfidf_vectorizer = tfidf(train_data, test_data)
+
+    #train_embeddings = avg_feature_vector(train_sentences, word2vec, NUM_FEATURES, train, tfidf_vectorizer, 300)
+    #test_embeddings = avg_feature_vector(test_sentences, word2vec, NUM_FEATURES, test, tfidf_vectorizer, 300)
+
+    train_embeddings = mean_embedding_vectorizer(train_sentences, word2vec, tfidf_vectorizer)
+    test_embeddings = mean_embedding_vectorizer(test_sentences, word2vec, tfidf_vectorizer)
 
     return train_embeddings, test_embeddings
+
+
+def avg_feature_vector(sentences, model, k):
+    """ Concatenates all words vector in a given sentence """
+
+    return np.array([np.concatenate([model[w] for w in words if w in model] or [np.zeros(k)], axis=0) for words in sentences])
