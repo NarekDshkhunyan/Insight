@@ -1,12 +1,11 @@
 import numpy as np
-import data_helpers
-from w2v import train_word2vec
 
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Flatten, Input, MaxPooling1D, Convolution1D, Embedding
 from keras.layers.merge import Concatenate
 from keras.datasets import imdb
 from keras.preprocessing import sequence
+
 np.random.seed(0)
 
 # ---------------------- Parameters section -------------------

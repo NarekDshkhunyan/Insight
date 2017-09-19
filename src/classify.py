@@ -15,7 +15,7 @@ def classify(method, X_train, y_train, X_test, y_test, results):
 
     if method == "svm":
         param_grid = {'C': [1e3, 5e3, 1e4, 5e4, 1e5], 'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1], 'kernel': ('linear', 'rbf')}
-        #clf = GridSearchCV(svm.SVC(kernel='rbf', class_weight='balanced'), param_grid)
+        #clf = GridSearchCV(svm.SVC(class_weight='balanced'), param_grid)
         clf = svm.SVC(C=5000.0, gamma=0.0005, kernel='rbf')
     elif method == "lr":
         param_grid = {'C': [0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0, 300.0]}
@@ -57,9 +57,9 @@ def evaluate(y_test, y_predicted, results):
 results = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 results_random = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 
-input_file = "../Data/tfidf_embeddings.pkl"
+input_file = "../Data/mean_embeddings.pkl"
 with open(input_file) as f:
     X_train, X_test, y_train, y_test = cPickle.load(f)
 
 # Run the classification algorithm
-classify('svm', X_train, y_train, X_test, y_test, results)
+classify('lr', X_train, y_train, X_test, y_test, results)

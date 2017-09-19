@@ -1,8 +1,7 @@
-from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-from collections import defaultdict
 import numpy as np
 import cPickle
-from utils import load_data
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+from collections import defaultdict
 
 
 NUM_FEATURES = 19
@@ -60,30 +59,6 @@ def mean_embedding_vectorizer(sentences, model, tfidf_vec):
     word2weight = defaultdict(lambda: max_idf, [(w, tfidf_vec.idf_[i]) for w, i in tfidf_vec.vocabulary_.items()])
     return np.array([np.mean([model[w]*word2weight[w] for w in words if w in model] or [np.zeros(300)], axis=0) for words in sentences])
 
-
-# -------------------------------------------------------------------------------------------------------------
-def produceEmbeddings(type, train_data, test_data):
-
-    train_sentences = load_data(train_data)
-    test_sentences = load_data(test_data)
-
-    train_tf, test_tf, tfidf_vectorizer = tfidf(train_data, test_data)
-    train_cv, test_cv, count_vectorizer = cv(train_data, test_data)
-
-    #train_embeddings = avg_feature_vector(train_sentences, word2vec, NUM_FEATURES, train, tfidf_vectorizer, 300)
-    #test_embeddings = avg_feature_vector(test_sentences, word2vec, NUM_FEATURES, test, tfidf_vectorizer, 300)
-
-    train_embeddings = mean_embedding_vectorizer(train_sentences, word2vec, tfidf_vectorizer)
-    test_embeddings = mean_embedding_vectorizer(test_sentences, word2vec, tfidf_vectorizer)
-
-    if type == 'mean_emb':
-        return train_embeddings, test_embeddings
-    if type == 'concat_emb':
-        return
-    if type == 'cv':
-        return train_cv, test_cv
-    if type == 'tfidf':
-        return train_tf, test_tf
 
 def avg_feature_vector(sentences, model, k):
     """ Concatenates all words vector in a given sentence """

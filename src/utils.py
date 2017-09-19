@@ -1,5 +1,4 @@
 import re, string, random
-import cPickle
 from nltk.tokenize import RegexpTokenizer
 
 # -------------------------------------------------------------------------------------------------------------
