@@ -59,7 +59,7 @@ def evaluate(y_test, y_predicted, results):
 results = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 results_random = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 
-input_file = "../Data/input_embeddings.pkl"
+input_file = "../Data/tfidf_embeddings.pkl"
 with open(input_file) as f:
     X_train, X_test, y_train, y_test = cPickle.load(f)
 

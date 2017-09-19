@@ -1,7 +1,12 @@
 import pandas as pd
 import numpy as np
 import cPickle
+import itertools
+from collections import Counter
 
+from utils import load_data
+
+#-------------------------------------------------------------------------------------------------------------
 qtype = pd.read_csv("../Data/Question Type.csv")         # 3846 x 3
 qtype = qtype.drop_duplicates()                          # 2842 x 3
 
@@ -16,48 +21,6 @@ questions = qtype.Question.tolist()     # 2842 questions
 labels = qtype.qual_codes.tolist()      # 58 labels
 questions = np.array(questions)
 labels = np.array(labels)
-
-#-------------------------------------------------------------------------------------------------------------
-import re
-import itertools
-from collections import Counter
-from nltk.tokenize import RegexpTokenizer
-
-
-tokenizer = RegexpTokenizer(r'\w+')
-
-def clean_str(string, TREC=False):
-    """
-    Tokenization/string cleaning for all datasets except for SST.
-    Every dataset is lower cased except for TREC
-    """
-    string = re.sub(r"[^A-Za-z0-9(),!?\'\`]", " ", string)     
-    string = re.sub(r"\'s", " \'s", string) 
-    string = re.sub(r"\'ve", " \'ve", string) 
-    string = re.sub(r"n\'t", " n\'t", string) 
-    string = re.sub(r"\'re", " \'re", string) 
-    string = re.sub(r"\'d", " \'d", string) 
-    string = re.sub(r"\'ll", " \'ll", string) 
-    string = re.sub(r",", " , ", string) 
-    string = re.sub(r"!", " ! ", string) 
-    string = re.sub(r"\(", " \( ", string) 
-    string = re.sub(r"\)", " \) ", string) 
-    string = re.sub(r"\?", " \? ", string) 
-    string = re.sub(r"\s{2,}", " ", string)    
-    return string.strip() if TREC else string.strip().lower()
-
-def tokenize(text):
-    #split on white spaces, remove punctuation, lower case each word
-    return [clean_str(word) for word in tokenizer.tokenize(text)]
-
-def load_data(data):
-
-    txts = []
-    for sentence in data:
-        txt = tokenize(sentence)
-        txts.append(txt)
-            
-    return txts
 
 #-------------------------------------------------------------------------------------------------------------
 def build_vocab(sentences):

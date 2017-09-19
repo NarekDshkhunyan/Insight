@@ -1,7 +1,6 @@
 import numpy as np
-import cPickle
-#import data_helpers
-#from w2v import train_word2vec
+import data_helpers
+from w2v import train_word2vec
 
 from keras.models import Sequential, Model
 from keras.layers import Dense, Dropout, Flatten, Input, MaxPooling1D, Convolution1D, Embedding
@@ -13,7 +12,7 @@ np.random.seed(0)
 # ---------------------- Parameters section -------------------
 #
 # Model type. See Kim Yoon's Convolutional Neural Networks for Sentence Classification, Section 3
-model_type = "CNN-static"  # CNN-rand|CNN-non-static|CNN-static
+model_type = "CNN-non-static"  # CNN-rand|CNN-non-static|CNN-static
 
 # Data source
 data_source = "keras_data_set"  # keras_data_set|local_dir
@@ -41,7 +40,7 @@ context = 10
 # ---------------------- Parameters end -----------------------
 
 
-def load(data_source):
+def load_data(data_source):
     assert data_source in ["keras_data_set", "local_dir"], "Unknown data source"
     if data_source == "keras_data_set":
         (x_train, y_train), (x_test, y_test) = imdb.load_data(num_words=max_words, start_char=None,
@@ -73,49 +72,31 @@ def load(data_source):
 
 # Data Preparation
 print("Load data...")
-#x_train, y_train, x_test, y_test, vocabulary_inv = load(data_source)
-input_file = "../Data/input_embeddings.pkl"
-with open(input_file) as f:
-    X_train, X_test, y_train, y_test = cPickle.load(f)
+x_train, y_train, x_test, y_test, vocabulary_inv = load_data(data_source)
 
-word2vec_file = "../Data/word2vec.pkl"
-with open(word2vec_file) as f:
-    word2vec = cPickle.load(f)
+if sequence_length != x_test.shape[1]:
+    print("Adjusting sequence length for actual size")
+    sequence_length = x_test.shape[1]
 
-data_file = "../Data/train_mat_filtered.pkl"
-#vocab_file = "../Data/vocab_filtered.pkl"
-vocab_inv_file = "../Data/vocab_inv_filtered.pkl"
-
-with open(data_file) as f:
-   data, labels, embedding_mat = cPickle.load(f)
-
-#with open(vocab_file) as f:
-#    vocabulary = cPickle.load(f)
-
-with open(vocab_inv_file) as f:
-    vocabulary_inv = cPickle.load(f)
-
-sequence_length = X_test.shape[1]
-
-print("x_train shape:", X_train.shape)
-print("x_test shape:", X_test.shape)
+print("x_train shape:", x_train.shape)
+print("x_test shape:", x_test.shape)
 print("Vocabulary Size: {:d}".format(len(vocabulary_inv)))
 
 # Prepare embedding layer weights and convert inputs for static model
 print("Model type is", model_type)
-#if model_type in ["CNN-non-static", "CNN-static"]:
-    # embedding_weights = train_word2vec(np.vstack((x_train, x_test)), vocabulary_inv, num_features=embedding_dim,
-    #                                    min_word_count=min_word_count, context=context)
-    # if model_type == "CNN-static":
-    #     x_train = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in X_train])
-    #     x_test = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in X_test])
-    #     print("x_train static shape:", x_train.shape)
-    #     print("x_test static shape:", x_test.shape)
+if model_type in ["CNN-non-static", "CNN-static"]:
+    embedding_weights = train_word2vec(np.vstack((x_train, x_test)), vocabulary_inv, num_features=embedding_dim,
+                                       min_word_count=min_word_count, context=context)
+    if model_type == "CNN-static":
+        x_train = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_train])
+        x_test = np.stack([np.stack([embedding_weights[word] for word in sentence]) for sentence in x_test])
+        print("x_train static shape:", x_train.shape)
+        print("x_test static shape:", x_test.shape)
 
-# elif model_type == "CNN-rand":
-#     embedding_weights = None
-# else:
-#     raise ValueError("Unknown model type")
+elif model_type == "CNN-rand":
+    embedding_weights = None
+else:
+    raise ValueError("Unknown model type")
 
 # Build model
 if model_type == "CNN-static":
@@ -161,5 +142,5 @@ if model_type == "CNN-non-static":
     embedding_layer.set_weights([weights])
 
 # Train the model
-model.fit(X_train, y_train, batch_size=batch_size, epochs=num_epochs,
-          validation_data=(X_test, y_test), verbose=2)
+model.fit(x_train, y_train, batch_size=batch_size, epochs=num_epochs,
+          validation_data=(x_test, y_test), verbose=2)
