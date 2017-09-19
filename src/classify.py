@@ -1,9 +1,8 @@
-#from sklearn.model_selection import GridSearchCV
 import cPickle
 
-from sklearn.naive_bayes import MultinomialNB, GaussianNB
 from sklearn import svm, tree
-from sklearn.neighbors import NearestNeighbors, RadiusNeighborsClassifier, KNeighborsClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
@@ -14,22 +13,21 @@ METRICS_CHOICE = 'weighted'
 def classify(method, X_train, y_train, X_test, y_test, results):
     """ Runs the classification algorithm of the choice """
 
-    #start = time.time()
-    if method == "mnb":
-        clf = MultinomialNB(alpha=0.5, class_prior=[0.1, 0.1, 0.1, 0.25, 0.45])
-    elif method == "svm":
-        # param_grid = {'C': [1e3, 5e3, 1e4, 5e4, 1e5], 'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1]}
-        # clf = GridSearchCV(svm.SVC(kernel='rbf', class_weight='balanced'), param_grid)
-        clf = svm.SVC(C=1000.0, kernel="rbf")
+    if method == "svm":
+        param_grid = {'C': [1e3, 5e3, 1e4, 5e4, 1e5], 'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1], 'kernel': ('linear', 'rbf')}
+        #clf = GridSearchCV(svm.SVC(kernel='rbf', class_weight='balanced'), param_grid)
+        clf = svm.SVC(C=5000.0, gamma=0.0005, kernel='rbf')
+    elif method == "lr":
+        param_grid = {'C': [0.01, 0.03, 0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0, 300.0]}
+        #clf = GridSearchCV(LogisticRegression(class_weight='balanced', solver='newton-cg', multi_class='multinomial', n_jobs=-1, random_state = 42), param_grid)
+        clf = LogisticRegression(C=30.0, class_weight='balanced', solver='newton-cg', multi_class='multinomial', n_jobs=-1, random_state=42)
+
     elif method == "knn":
         clf = KNeighborsClassifier(n_neighbors=10, algorithm='auto')
     elif method == "dt":
         clf = tree.DecisionTreeClassifier(min_samples_split=30)
     elif method == "rf":
         clf = RandomForestClassifier(n_estimators=100, max_features='sqrt', oob_score=True, n_jobs=-1, random_state=42)
-    elif method == "lr":
-        clf = LogisticRegression(C=0.1, class_weight='balanced', solver='newton-cg', multi_class='multinomial', n_jobs=-1,
-                                random_state=42)
 
     # Fit the model and predict labels
     clf = clf.fit(X_train, y_train)
