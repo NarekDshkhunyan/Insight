@@ -2,4 +2,5 @@ Data
 Embeddings
 Papers
 *.csv
+*.pyc
 .idea
