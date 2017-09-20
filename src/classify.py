@@ -1,11 +1,9 @@
-import cPickle
-
 from sklearn import svm, tree
-from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score, classification_report
 METRICS_CHOICE = 'weighted'
 
@@ -33,33 +31,23 @@ def classify(method, X_train, y_train, X_test, y_test, results):
     clf = clf.fit(X_train, y_train)
     y_predicted = clf.predict(X_test)
 
-    results = evaluate(y_test, y_predicted, results)
+    evaluate(y_test, y_predicted, results)
 
 
 
 #-------------------------------------------------------------------------------------------------------------
 def evaluate(y_test, y_predicted, results):
     """ Helper function to print the results """
+
     precision = precision_score(y_test, y_predicted, pos_label=None,
-                                average=METRICS_CHOICE)  # true positives / (true positives+false positives)
+                                average=METRICS_CHOICE)             # true positives / (true positives+false positives)
     recall = recall_score(y_test, y_predicted, pos_label=None,
-                          average=METRICS_CHOICE)  # true positives /(true positives + false negatives)
+                          average=METRICS_CHOICE)                   # true positives / (true positives + false negatives)
     f1 = f1_score(y_test, y_predicted, pos_label=None, average=METRICS_CHOICE)
-    accuracy = accuracy_score(y_test, y_predicted)  # num of correct predictions/ total num of predictions
+    accuracy = accuracy_score(y_test, y_predicted)                  # num of correct predictions/ total num of predictions
     print "accuracy = %.3f, precision = %.3f, recall = %.3f, f1 = %.3f" % (accuracy, precision, recall, f1)
     results['accuracy'].append(accuracy)
     results['precision'].append(precision)
     results['recall'].append(recall)
     results['f1'].append(f1)
     return results
-
-
-results = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
-results_random = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
-
-input_file = "../Data/mean_embeddings.pkl"
-with open(input_file) as f:
-    X_train, X_test, y_train, y_test = cPickle.load(f)
-
-# Run the classification algorithm
-classify('lr', X_train, y_train, X_test, y_test, results)
