@@ -2,7 +2,7 @@ import numpy as np
 import cPickle
 
 from keras.models import Sequential, Model
-from keras.layers import Dense, Dropout, Flatten, Input, MaxPooling1D, Convolution1D, Embedding
+from keras.layers import Dense, Dropout, Flatten, Input, MaxPooling1D, Convolution1D, Embedding, Convolution2D, MaxPooling2D
 from keras.layers.merge import Concatenate
 from keras.preprocessing import sequence
 
@@ -18,7 +18,7 @@ dropout_prob = (0.5, 0.8)
 hidden_dims = 50
 
 # Training parameters
-batch_size = 32
+batch_size = 16
 num_epochs = 10
 
 # Prepossessing parameters
@@ -28,7 +28,7 @@ max_words = 5000
 # ---------------------- Parameters end -----------------------
 print("Load data...")
 
-input_shape = (sequence_length, embedding_dim)
+input_shape = (sequence_length, embedding_dim)   # sequence_length
 
 def CNN():
     model_input = Input(shape=input_shape)
@@ -40,7 +40,7 @@ def CNN():
     for sz in filter_sizes:
         conv = Convolution1D(filters=num_filters,
                          kernel_size=sz,
-                         padding="valid",
+                         padding="same",
                          activation="relu",
                          strides=1)(z)
         conv = MaxPooling1D(pool_size=2)(conv)
