@@ -39,5 +39,4 @@ for word, i in word_index.items():
         # words not found in embedding index will be all-zeros.
         embedding_matrix[i] = embedding_vector
 
-
 cPickle.dump(embedding_matrix, open('Data/embedding_matrix.pkl', 'wb'))
