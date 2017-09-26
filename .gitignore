@@ -2,6 +2,8 @@ Data
 Embeddings
 Papers
 Kim
+IMDB
+ConvModels/Data
 *.csv
 *.pyc
 .idea
