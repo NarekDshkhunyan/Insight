@@ -12,10 +12,18 @@ http://www.cs.cmu.edu/afs/cs.cmu.edu/project/theo-20/www/data/news20.html
 
 import cPickle
 
-from keras.layers import Dense, Input, Flatten, Dropout, Merge
-from keras.layers import Conv1D, MaxPooling1D, Embedding
+import numpy as np
+
+from keras.layers import Dense, Input, Embedding, Dropout
 from keras.layers import LSTM, Bidirectional, GRU
 from keras.models import Model
+
+from keras import backend as K
+from keras.layers import Lambda
+from keras.engine.topology import Layer, InputSpec
+from keras import initializers
+
+from keras.layers import Flatten, merge, TimeDistributed, Activation, RepeatVector, Permute
 
 # -------------------------------------------------------------------------------------------------------------
 MAX_SEQUENCE_LENGTH = 20
@@ -35,6 +43,33 @@ with open(val_matrix_file) as f:
     x_val, y_val = cPickle.load(f)
 # -------------------------------------------------------------------------------------------------------------
 
+class AttLayer(Layer):
+    def __init__(self, **kwargs):
+        self.init = initializers.get('normal')
+        #self.input_spec = [InputSpec(ndim=3)]
+        super(AttLayer, self).__init__(** kwargs)
+
+    def build(self, input_shape):
+        assert len(input_shape)==3
+        #self.W = self.init((input_shape[-1],1))
+        self.W = self.init((input_shape[-1],))
+        #self.input_spec = [InputSpec(shape=input_shape)]
+        self.trainable_weights = [self.W]
+        super(AttLayer, self).build(input_shape)  # be sure you call this somewhere!
+
+    def call(self, x, mask=None):
+        eij = K.tanh(K.dot(x, self.W))
+
+        ai = K.exp(eij)
+        weights = ai/K.sum(ai, axis=1).dimshuffle(0,'x')
+
+        weighted_input = x*weights.dimshuffle(0,1,'x')
+        return weighted_input.sum(axis=1)
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], input_shape[-1])
+
+
 # load pre-trained word embeddings into an Embedding layer
 # note that we set trainable = False so as to keep the embeddings fixed
 embedding_layer = Embedding(num_words,
@@ -48,33 +83,25 @@ print('Training model.')
 # train a 1D convnet with global maxpooling
 sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
 embedded_sequences = embedding_layer(sequence_input)
+lstm = LSTM(100, return_sequences=True)(embedded_sequences)
 
-# -------------------------------------------------------------------------------------------------------------
-# Yoon Kim model
-convs = []
-filter_sizes = [3,4,5]
+# compute importance for each step
+attention = Dense(1, activation='tanh')(lstm)
+attention = Flatten()(attention)
+attention = Activation('softmax')(attention)
+attention = RepeatVector(100)(attention)
+attention = Permute([2, 1])(attention)
 
-for fsz in filter_sizes:
-    l_conv = Conv1D(filters=128, kernel_size=fsz, activation='relu')(embedded_sequences)
-    l_pool = MaxPooling1D(pool_size=3)(l_conv)
-    convs.append(l_pool)
+# apply the attention
+sent_representation = merge([lstm, attention], mode='mul')
+sent_representation = Lambda(lambda xin: K.sum(xin, axis=1))(sent_representation)
 
-l_merge = Merge(mode='concat', concat_axis=1)(convs)
-# -------------------------------------------------------------------------------------------------------------
+#gru = Bidirectional(GRU(100, return_sequences=True))(embedded_sequences)
+#att = AttLayer()(gru)
+#x = Dense(128, activation='relu')(l_att)
+#lstm = Dropout(0.5)(lstm)
 
-conv_1 = Conv1D(filters=128, kernel_size=3, activation='relu')(l_merge)
-pool_1 = MaxPooling1D(pool_size=3)(conv_1)
-print conv_1.shape, pool_1.shape
-#conv_2 = Conv1D(filters=128, kernel_size=3, activation='relu')(pool_1)
-#pool_2 = MaxPooling1D(pool_size=3)(conv_2)
-#print conv_2.shape, pool_2.shape
-#lstm = Bidirectional(LSTM(64))(pool_1)
-x = Dropout(0.5)(pool_1)
-x = Flatten()(x)                           # uncomment if no LSTM
-x = Dense(128, activation='relu')(x)
-#x = Dropout(0.5)(x)
-
-preds = Dense(labels_index, activation='softmax')(x)
+preds = Dense(labels_index, activation='softmax')(lstm)
 
 model = Model(sequence_input, preds)
 model.compile(loss='categorical_crossentropy',
@@ -91,3 +118,4 @@ score, acc = model.evaluate(x_val, y_val,
                             batch_size=32)
 print('Test score:', score)
 print('Test accuracy:', acc)
+
