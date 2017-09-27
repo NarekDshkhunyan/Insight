@@ -6,7 +6,7 @@ import numpy as np
 
 from transform import *
 from classify import *
-from cnn_core import *
+#from cnn_core import *
 
 # -------------------------------------------------------------------------------------------------------------
 data_file = "../Data/train_mat_filtered.pkl"
@@ -18,8 +18,8 @@ with open(data_file) as f:
 with open(vocab_inv_file) as f:
     vocabulary_inv = cPickle.load(f)
 
-algorithm = 'svm'
-type = 'concat_emb'
+algorithm = 'lr'
+type = 'cv'
 results = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 
 # -------------------------------------------------------------------------------------------------------------
@@ -30,20 +30,20 @@ print X_train.shape, X_test.shape
 #cPickle.dump([X_train, X_test, y_train, y_test], open('../Data/mean_embeddings.pkl', 'wb'))
 
 # Run the classification algorithm
-#classify(algorithm, X_train, y_train, X_test, y_test, results)
+classify(algorithm, X_train, y_train, X_test, y_test, results)
 
 #X_train = np.reshape(X_train, (2557, 300, 19))      # only on mean_emb
 #X_test = np.reshape(X_test, (285, 300, 19))
 
-model = CNN()
-model.fit(X_train, y_train, batch_size=batch_size, epochs=num_epochs,
-          validation_data=(X_test, y_test), verbose=2)
-predictions_valid = model.predict(X_test, batch_size=batch_size, verbose=1)
+#model = CNN()
+#model.fit(X_train, y_train, batch_size=batch_size, epochs=num_epochs,
+#          validation_data=(X_test, y_test), verbose=2)
+#predictions_valid = model.predict(X_test, batch_size=batch_size, verbose=1)
 #score = log_loss(y_test, predictions_valid)
 #print('Score log_loss: ', score)
 
 # Cross-validation
-#for k, (train, test) in enumerate(KFold(10).split(embeddings, labels)):
-#    X_train, X_test, y_train, y_test = embeddings[train], embeddings[test], labels[train], labels[test]
-#    print classify(algorithm, X_train, y_train, X_test, y_test, results)
+for k, (train, test) in enumerate(KFold(10).split(embeddings, labels)):
+   X_train, X_test, y_train, y_test = embeddings[train], embeddings[test], labels[train], labels[test]
+   print classify(algorithm, X_train, y_train, X_test, y_test, results)
 

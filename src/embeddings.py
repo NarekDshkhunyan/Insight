@@ -15,7 +15,7 @@ k = len(word2vec.itervalues().next())
 
 # -------------------------------------------------------------------------------------------------------------
 def cv(data):
-    count_vectorizer = CountVectorizer()
+    count_vectorizer = CountVectorizer(ngram_range=(1,2))
 
     emb = count_vectorizer.fit_transform(data)
 
@@ -23,7 +23,7 @@ def cv(data):
 
 
 def tfidf(data):
-    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_vectorizer = TfidfVectorizer(ngram_range=(1,2))
 
     train = tfidf_vectorizer.fit_transform(data)
 
@@ -35,7 +35,7 @@ def mean_embedding_vectorizer(sentences, model, tfidf_vec):
 
     max_idf = max(tfidf_vec.idf_)
     word2weight = defaultdict(lambda: max_idf, [(w, tfidf_vec.idf_[i]) for w, i in tfidf_vec.vocabulary_.items()])
-    return np.array([np.mean([model[w] for w in words if w in model] or [np.zeros(300)], axis=0) for words in sentences]) # *word2weight[w]
+    return np.array([np.mean([model[w]*word2weight[w] for w in words if w in model] or [np.zeros(300)], axis=0) for words in sentences]) # *word2weight[w]
     #return np.stack([np.mean([model[word] for word in sentence if word in model] or [np.zeros(k)]) for sentence in sentences])
 
 

@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-qtype = pd.read_csv("Question Type.csv")         # 3846 x 3
-tsummary = pd.read_csv("Topical Summary.csv")    # 5601 x 6
+qtype = pd.read_csv("Data/QuestionType.csv")         # 3846 x 3
+tsummary = pd.read_csv("Data/TopicalSummary.csv")    # 5601 x 6
 
 # Turn the varaibles into categorical and then use one-hot encoding
 qtype['qual_cc'] = qtype['Qualitative Tag'].astype('category')

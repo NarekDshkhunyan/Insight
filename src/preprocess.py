@@ -7,7 +7,7 @@ from collections import Counter
 from utils import load_data
 
 #-------------------------------------------------------------------------------------------------------------
-qtype = pd.read_csv("../Data/Question Type.csv")         # 3846 x 3
+qtype = pd.read_csv("../Data/QuestionType.csv")         # 3846 x 3
 qtype = qtype.drop_duplicates()                          # 2842 x 3
 
 # Turn the varaibles into categorical and then use one-hot encoding
