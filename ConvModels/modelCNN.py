@@ -14,7 +14,6 @@ import cPickle
 
 from keras.layers import Dense, Input, Flatten, Dropout, Merge
 from keras.layers import Conv1D, MaxPooling1D, Embedding
-from keras.layers import LSTM, Bidirectional, GRU
 from keras.models import Model
 
 # -------------------------------------------------------------------------------------------------------------
@@ -68,7 +67,6 @@ print conv_1.shape, pool_1.shape
 #conv_2 = Conv1D(filters=128, kernel_size=3, activation='relu')(pool_1)
 #pool_2 = MaxPooling1D(pool_size=3)(conv_2)
 #print conv_2.shape, pool_2.shape
-#lstm = Bidirectional(LSTM(64))(pool_1)
 x = Dropout(0.5)(pool_1)
 x = Flatten()(x)                           # uncomment if no LSTM
 x = Dense(128, activation='relu')(x)

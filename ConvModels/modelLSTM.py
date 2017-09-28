@@ -13,6 +13,7 @@ http://www.cs.cmu.edu/afs/cs.cmu.edu/project/theo-20/www/data/news20.html
 import cPickle
 
 from keras.layers import Dense, Input, Embedding, Dropout
+from keras.layers import Conv1D, MaxPooling1D, Flatten
 from keras.layers import LSTM, GRU, Bidirectional
 from keras.models import Model
 
@@ -46,18 +47,33 @@ embedding_layer = Embedding(input_dim=num_words,
 
 print('Training model.')
 
-# train a 1D convnet with global maxpooling
+# train an LSTM for classification
 sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
 embedded_sequences = embedding_layer(sequence_input)
-lstm = Bidirectional(LSTM(100))(embedded_sequences)
+lstm = Bidirectional(LSTM(100, return_sequences=True))(embedded_sequences)    # put return_sequences=True if running CNN on top of LSTM
 lstm = Dropout(0.5)(lstm)
 
-preds = Dense(labels_index, activation='softmax')(lstm)
+# add a 1D convnet with global maxpooling
+conv_1 = Conv1D(filters=128, kernel_size=3, activation='relu')(lstm)
+pool_1 = MaxPooling1D(pool_size=3)(conv_1)
+x = Dropout(0.5)(pool_1)
+x = Flatten()(x)                           # uncomment if no LSTM
+x = Dense(128, activation='relu')(x)
+#x = Dropout(0.5)(x)
+
+preds = Dense(labels_index, activation='softmax')(x)                          # use LSTM instead of x if not using CNN
+
+# print sequence_input.shape
+# print embedded_sequences.shape
+# print lstm.shape
+# print conv_1.shape, pool_1.shape
+# print x.shape
+# print preds.shape
 
 model = Model(sequence_input, preds)
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
-              metrics=['acc'])
+              metrics=['accuracy'])
 #model.summary()
 
 model.fit(x_train, y_train,

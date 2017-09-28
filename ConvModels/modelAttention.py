@@ -12,8 +12,6 @@ http://www.cs.cmu.edu/afs/cs.cmu.edu/project/theo-20/www/data/news20.html
 
 import cPickle
 
-import numpy as np
-
 from keras.layers import Dense, Input, Embedding, Dropout
 from keras.layers import LSTM, Bidirectional, GRU
 from keras.models import Model
@@ -83,6 +81,7 @@ print('Training model.')
 # train a 1D convnet with global maxpooling
 sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
 embedded_sequences = embedding_layer(sequence_input)
+
 lstm = LSTM(100, return_sequences=True)(embedded_sequences)
 
 # compute importance for each step
@@ -92,21 +91,25 @@ attention = Activation('softmax')(attention)
 attention = RepeatVector(100)(attention)
 attention = Permute([2, 1])(attention)
 
+print lstm.shape
+print attention.shape
+
 # apply the attention
 sent_representation = merge([lstm, attention], mode='mul')
 sent_representation = Lambda(lambda xin: K.sum(xin, axis=1))(sent_representation)
 
-#gru = Bidirectional(GRU(100, return_sequences=True))(embedded_sequences)
-#att = AttLayer()(gru)
-#x = Dense(128, activation='relu')(l_att)
+# gru = Bidirectional(GRU(100, return_sequences=True))(embedded_sequences)
+# att = AttLayer()(gru)
+# x = Dense(128, activation='relu')(att)
 #lstm = Dropout(0.5)(lstm)
 
-preds = Dense(labels_index, activation='softmax')(lstm)
+preds = Dense(labels_index, activation='softmax')(sent_representation)
+print preds.shape
 
 model = Model(sequence_input, preds)
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
-              metrics=['acc'])
+              metrics=['accuracy'])
 #model.summary()
 
 model.fit(x_train, y_train,
