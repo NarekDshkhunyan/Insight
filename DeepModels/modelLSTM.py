@@ -10,7 +10,7 @@ from keras.models import Model
 
 
 # -----------------------------------------------------------------------------------------------------------
-def LSTMNet(embeddings, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index, CNN = False):
+def LSTMNet(embeddings, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index, CNN = False, train = False):
 
     # load pre-trained word embeddings into an Embedding layer
     # note that we set trainable = False so as to keep the embeddings fixed
@@ -18,7 +18,7 @@ def LSTMNet(embeddings, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_in
                                 output_dim=EMBEDDING_DIM,
                                 weights=[embeddings],
                                 input_length=MAX_SEQUENCE_LENGTH,
-                                trainable=True)
+                                trainable=train)
 
     print('Training model.')
 

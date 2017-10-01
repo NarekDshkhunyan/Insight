@@ -15,6 +15,7 @@ num_words = 1880               # number of unique words 1724
 EMBEDDING_DIM = 300
 labels_index = 33              # number of labels       20
 CNN = False                    # whether to build a ConvNet on top of the LSTM
+train = False                  # whether to train the embeddings as well
 
 # -------------------------------------------------------------------------------------------------------------
 # load the relevant pickles
@@ -29,9 +30,9 @@ with open(embedding_matrix_file) as f:
     embedding_matrix = cPickle.load(f)
 
 # -------------------------------------------------------------------------------------------------------------
-model = ConvNet(embedding_matrix, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index)
+#model = ConvNet(embedding_matrix, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index, train)
 #model = LSTMNet(embedding_matrix, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index)
-#model = AttentionNet(embedding_matrix, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index)
+model = AttentionNet(embedding_matrix, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index)
 #model.summary()
 
 model.fit(x_train, y_train,

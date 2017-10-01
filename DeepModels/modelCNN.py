@@ -10,7 +10,7 @@ from keras.layers import LSTM, Bidirectional
 from keras.models import Model
 
 # -------------------------------------------------------------------------------------------------------------
-def ConvNet(embeddings, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index):
+def ConvNet(embeddings, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index, train = False):
 
     # load pre-trained word embeddings into an Embedding layer
     # note that we set trainable = False so as to keep the embeddings fixed
@@ -18,7 +18,7 @@ def ConvNet(embeddings, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_in
                             EMBEDDING_DIM,
                             weights=[embeddings],
                             input_length=MAX_SEQUENCE_LENGTH,
-                            trainable=True)
+                            trainable=train)
 
     print('Training model.')
 
