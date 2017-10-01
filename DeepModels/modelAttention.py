@@ -3,9 +3,6 @@ This script loads pre-trained word embeddings (GloVe embeddings) into a frozen K
 and uses it to train a text classification model with a ConvNet architecture
 
 '''
-
-import cPickle
-
 from keras.layers import Dense, Input, Embedding, Dropout
 from keras.layers import LSTM, Bidirectional, GRU
 from keras.models import Model
@@ -18,23 +15,6 @@ from keras import initializers
 from keras.layers import Flatten, merge, TimeDistributed, Activation, RepeatVector, Permute
 
 # -------------------------------------------------------------------------------------------------------------
-MAX_SEQUENCE_LENGTH = 20
-num_words = 1880               # number of unique words 1724
-EMBEDDING_DIM = 300
-labels_index = 33              # number of labels       20
-
-# load the relevant pickles
-embedding_matrix_file = "Data/embedding_matrix.pkl"
-train_matrix_file = "Data/train_matrix.pkl"
-val_matrix_file = "Data/val_matrix.pkl"
-with open(embedding_matrix_file) as f:
-    embedding_matrix = cPickle.load(f)
-with open(train_matrix_file) as f:
-    x_train, y_train = cPickle.load(f)
-with open(val_matrix_file) as f:
-    x_val, y_val = cPickle.load(f)
-# -------------------------------------------------------------------------------------------------------------
-
 class AttLayer(Layer):
     def __init__(self, **kwargs):
         self.init = initializers.get('normal')
@@ -62,57 +42,50 @@ class AttLayer(Layer):
         return (input_shape[0], input_shape[-1])
 
 
-# load pre-trained word embeddings into an Embedding layer
-# note that we set trainable = False so as to keep the embeddings fixed
-embedding_layer = Embedding(num_words,
-                            EMBEDDING_DIM,
-                            weights=[embedding_matrix],
-                            input_length=MAX_SEQUENCE_LENGTH,
-                            trainable=False)
+# -------------------------------------------------------------------------------------------------------------
+def AttentionNet(embeddings, MAX_SEQUENCE_LENGTH, num_words, EMBEDDING_DIM, labels_index):
 
-print('Training model.')
+    # load pre-trained word embeddings into an Embedding layer
+    # note that we set trainable = False so as to keep the embeddings fixed
+    embedding_layer = Embedding(num_words,
+                                EMBEDDING_DIM,
+                                weights=[embeddings],
+                                input_length=MAX_SEQUENCE_LENGTH,
+                                trainable=True)
 
-# get the input for the LSTM network
-sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
-embedded_sequences = embedding_layer(sequence_input)
+    print('Training model.')
 
-lstm = Bidirectional(LSTM(100, return_sequences=True))(embedded_sequences)
+    # get the input for the LSTM network
+    sequence_input = Input(shape=(MAX_SEQUENCE_LENGTH,), dtype='int32')
+    embedded_sequences = embedding_layer(sequence_input)
 
-# compute importance for each step
-attention = Dense(1, activation='tanh')(lstm)
-attention = Flatten()(attention)
-attention = Activation('softmax')(attention)
-attention = RepeatVector(200)(attention)
-attention = Permute([2, 1])(attention)
+    lstm = Bidirectional(LSTM(100, return_sequences=True))(embedded_sequences)
 
-#print lstm.shape
-#print attention.shape
+    # compute importance for each step
+    attention = Dense(1, activation='tanh')(lstm)
+    attention = Flatten()(attention)
+    attention = Activation('softmax')(attention)
+    attention = RepeatVector(200)(attention)
+    attention = Permute([2, 1])(attention)
 
-# apply the attention
-sent_representation = merge([lstm, attention], mode='mul')
-sent_representation = Lambda(lambda xin: K.sum(xin, axis=1))(sent_representation)
+    #print lstm.shape
+    #print attention.shape
 
-# gru = Bidirectional(GRU(100, return_sequences=True))(embedded_sequences)
-# att = AttLayer()(gru)
-# x = Dense(128, activation='relu')(att)
-#lstm = Dropout(0.5)(lstm)
+    # apply the attention
+    sent_representation = merge([lstm, attention], mode='mul')
+    sent_representation = Lambda(lambda xin: K.sum(xin, axis=1))(sent_representation)
 
-preds = Dense(labels_index, activation='softmax')(sent_representation)
-print preds.shape
+    # gru = Bidirectional(GRU(100, return_sequences=True))(embedded_sequences)
+    # att = AttLayer()(gru)
+    # x = Dense(128, activation='relu')(att)
+    #lstm = Dropout(0.5)(lstm)
 
-model = Model(sequence_input, preds)
-model.compile(loss='categorical_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
-#model.summary()
+    preds = Dense(labels_index, activation='softmax')(sent_representation)
+    print preds.shape
 
-model.fit(x_train, y_train,
-          batch_size=32,
-          epochs=10,
-          validation_data=(x_val, y_val))
+    model = Model(sequence_input, preds)
+    model.compile(loss='categorical_crossentropy',
+                  optimizer='adam',
+                  metrics=['accuracy'])
 
-score, acc = model.evaluate(x_val, y_val,
-                            batch_size=32)
-print('Test score:', score)
-print('Test accuracy:', acc)
-
+    return model
