@@ -2,7 +2,8 @@ import cPickle
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
 
-import numpy as np
+from sklearn.metrics import confusion_matrix
+from confusion_matrix import plot_confusion_matrix
 
 from transform import *
 from classify import *
@@ -19,7 +20,7 @@ with open(vocab_inv_file) as f:
     vocabulary_inv = cPickle.load(f)
 
 algorithm = 'lr'
-type = 'cv'
+type = 'tfidf'
 results = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 
 # -------------------------------------------------------------------------------------------------------------
@@ -30,7 +31,13 @@ print X_train.shape, X_test.shape
 #cPickle.dump([X_train, X_test, y_train, y_test], open('../Data/mean_embeddings.pkl', 'wb'))
 
 # Run the classification algorithm
-classify(algorithm, X_train, y_train, X_test, y_test, results)
+y_predicted = classify(algorithm, X_train, y_train, X_test, y_test, results)
+cm = confusion_matrix(y_test, y_predicted)
+
+# Cross-validation
+# for k, (train, test) in enumerate(KFold(10).split(embeddings, labels)):
+#    X_train, X_test, y_train, y_test = embeddings[train], embeddings[test], labels[train], labels[test]
+#    print classify(algorithm, X_train, y_train, X_test, y_test, results)
 
 #X_train = np.reshape(X_train, (2557, 300, 19))      # only on mean_emb
 #X_test = np.reshape(X_test, (285, 300, 19))
@@ -42,8 +49,5 @@ classify(algorithm, X_train, y_train, X_test, y_test, results)
 #score = log_loss(y_test, predictions_valid)
 #print('Score log_loss: ', score)
 
-# Cross-validation
-for k, (train, test) in enumerate(KFold(10).split(embeddings, labels)):
-   X_train, X_test, y_train, y_test = embeddings[train], embeddings[test], labels[train], labels[test]
-   print classify(algorithm, X_train, y_train, X_test, y_test, results)
-
+plot = plot_confusion_matrix(cm, classes=np.arange(33), normalize=True, title='Confusion matrix')
+plot.show()

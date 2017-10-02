@@ -15,7 +15,7 @@ num_words = 1880               # number of unique words 1724
 EMBEDDING_DIM = 300
 labels_index = 33              # number of labels       20
 CNN = False                    # whether to build a ConvNet on top of the LSTM
-train = False                  # whether to train the embeddings as well
+train = True                  # whether to train the embeddings as well
 
 # -------------------------------------------------------------------------------------------------------------
 # load the relevant pickles

@@ -8,7 +8,18 @@ from utils import load_data
 
 #-------------------------------------------------------------------------------------------------------------
 qtype = pd.read_csv("../Data/QuestionType.csv")         # 3846 x 3
-qtype = qtype.drop_duplicates()                          # 2842 x 3
+qtype = qtype.drop_duplicates()                         # 2842 x 3
+
+# Remove categories with < 20 questions
+categories = ['Roxy-Composition-Internet','Hotel-Location','Roxy-About-Sports','Hotel-Permission','Roxy-About-Social_Media','Roxy-Surveillance-Eavesdrop','Roxy-About-Pets',
+            'Roxy-History-Persons','Roxy-History-Movement','Roxy-Composition-Water','Conversation-Secrets','Roxy-About-Politics','Conversation-Statement',
+            'Roxy-Surveillance-Recording','Hotel-Controls','Roxy-Composition-Internal','Roxy-About-Gender','Roxy-History-Work','Roxy-History-Memory','Roxy-About-Religion',
+            'Roxy-History-Education','Roxy-Power-Charging','Roxy-Surveillance-Camera','Hotel-Question','Roxy-Composition-Connection',
+            #'Roxy-Composition-Language','Roxy-Composition-Durability','Hotel-Knowledge','Roxy-Power-Sleep','Roxy-History-Being_in_Room','Roxy-Power-General','Roxy-About-Naming',
+            #'Conversation-Other_Persons','Roxy-Power-Battery','Roxy-Function-Boss','Roxy-Surveillance-Listening','Roxy-Composition-Cost','Roxy-Surveillance-Spying'
+            ]
+for category in categories:
+    qtype = qtype[qtype['Qualitative Tag']!=category]
 
 # Turn the varaibles into categorical and then use one-hot encoding
 qtype['qual_cc'] = qtype['Qualitative Tag'].astype('category')
