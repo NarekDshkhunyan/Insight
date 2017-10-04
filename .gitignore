@@ -6,4 +6,5 @@ IMDB
 ConvModels/Data
 *.csv
 *.pyc
+*.png
 .idea
