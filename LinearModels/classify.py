@@ -32,9 +32,9 @@ def classify(method, X_train, y_train, X_test, y_test, results):
     clf = clf.fit(X_train, y_train)
     y_predicted = clf.predict(X_test)
 
-    evaluate(y_test, y_predicted, results)
+    results = evaluate(y_test, y_predicted, results)
 
-    return y_predicted
+    return results
 
 
 

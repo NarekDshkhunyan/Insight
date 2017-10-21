@@ -43,13 +43,14 @@ if __name__ == "__main__":
     # Run the classification algorithm
     results = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
     y_predicted = classify(args.algorithm, X_train, y_train, X_test, y_test, results)
-    cm = confusion_matrix(y_test, y_predicted)
 
-    # Cross-validation
-    # for k, (train, test) in enumerate(KFold(3).split(embeddings, labels)):
-    #    X_train, X_test, y_train, y_test = embeddings[train], embeddings[test], labels[train], labels[test]
-    #    print classify(algorithm, X_train, y_train, X_test, y_test, results)
+    #Cross-validation
+    for k, (train, test) in enumerate(KFold(3).split(embeddings, labels)):
+       X_train, X_test, y_train, y_test = embeddings[train], embeddings[test], labels[train], labels[test]
+       results = classify(args.algorithm, X_train, y_train, X_test, y_test, results)
+    print 'Final accuracy =', np.mean(results['accuracy'])
 
     if args.plot_confusion_matrix == 'True':
+        cm = confusion_matrix(y_test, y_predicted)
         plot = plot_confusion_matrix(cm, classes=np.arange(33), normalize=True, title='Confusion matrix')
         plot.show()
