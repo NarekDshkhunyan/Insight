@@ -6,7 +6,7 @@ from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
 
-MAX_SEQUENCE_LENGTH = 20            # 1000
+MAX_SEQUENCE_LENGTH = 19            # 1000
 MAX_NB_WORDS = 2000                 # 20000
 VALIDATION_SPLIT = 0.1
 
@@ -68,6 +68,6 @@ x_val = data[-num_validation_samples:]
 y_val = labels[-num_validation_samples:]
 
 # dump data into pickle format
-cPickle.dump([x_train, y_train], open('Data/train_matrix.pkl', 'wb'))
-cPickle.dump([x_val, y_val], open('Data/val_matrix.pkl', 'wb'))
-cPickle.dump(word_index, open('Data/word_index.pkl', 'wb'))
+cPickle.dump([x_train, y_train], open('../Data/train_matrix.pkl', 'wb'))
+cPickle.dump([x_val, y_val], open('../Data/val_matrix.pkl', 'wb'))
+cPickle.dump(word_index, open('../Data/word_index.pkl', 'wb'))

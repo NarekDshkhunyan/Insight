@@ -1,14 +1,14 @@
 import os, cPickle
 import numpy as np
 
-BASE_DIR = '/home/narek/Dropbox/Insight/IMDB'
+BASE_DIR = '../Embeddings'
 GLOVE_DIR = BASE_DIR + '/glove.6B/'
 
 MAX_NB_WORDS = 2000             # 20000
 EMBEDDING_DIM = 300
 
 # load the word index dictionary
-wordindex_file = "Data/word_index.pkl"
+wordindex_file = "../Data/word_index.pkl"
 with open(wordindex_file) as f:
     word_index = cPickle.load(f)
 
@@ -39,4 +39,4 @@ for word, i in word_index.items():
         # words not found in embedding index will be all-zeros.
         embedding_matrix[i] = embedding_vector
 
-cPickle.dump(embedding_matrix, open('Data/embedding_matrix.pkl', 'wb'))
+cPickle.dump(embedding_matrix, open('../Data/embedding_matrix.pkl', 'wb'))
