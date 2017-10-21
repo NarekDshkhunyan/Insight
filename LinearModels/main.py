@@ -8,6 +8,8 @@ from confusion_matrix import plot_confusion_matrix
 from transform import *
 from classify import *
 
+import argparse
+
 # -------------------------------------------------------------------------------------------------------------
 data_file = "../Data/train_mat_filtered.pkl"
 #vocab_file = "../Data/vocab_filtered.pkl"
@@ -18,25 +20,36 @@ with open(data_file) as f:
 with open(vocab_inv_file) as f:
     vocabulary_inv = cPickle.load(f)
 
-algorithm = 'svm'
-type = 'mean_emb'
-results = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
-
 # -------------------------------------------------------------------------------------------------------------
-embeddings, labels = getEmbeddings(data, labels, vocabulary_inv, type)
-# Random split
-X_train, X_test, y_train, y_test = train_test_split(embeddings, labels, test_size=0.25, random_state=42)
-print X_train.shape, X_test.shape
-#cPickle.dump([X_train, X_test, y_train, y_test], open('../Data/mean_embeddings.pkl', 'wb'))
+if __name__ == "__main__":
 
-# Run the classification algorithm
-y_predicted = classify(algorithm, X_train, y_train, X_test, y_test, results)
-cm = confusion_matrix(y_test, y_predicted)
+    parser = argparse.ArgumentParser(description='Classify the given sentences.')
+    parser.add_argument('algorithm', default='lr',
+                        help='the linear classifier to run')
+    parser.add_argument('embedding', default='tfidf',
+                        help='which embedding to use')
+    parser.add_argument('plot_confusion_matrix', default='False',
+                        help='whether to plot the confusion matrix')
 
-# Cross-validation
-# for k, (train, test) in enumerate(KFold(10).split(embeddings, labels)):
-#    X_train, X_test, y_train, y_test = embeddings[train], embeddings[test], labels[train], labels[test]
-#    print classify(algorithm, X_train, y_train, X_test, y_test, results)
+    args = parser.parse_args()
+    print args
 
-plot = plot_confusion_matrix(cm, classes=np.arange(58), normalize=True, title='Confusion matrix')
-plot.show()
+    embeddings, labels = getEmbeddings(data, labels, vocabulary_inv, args.embedding)
+    # Random split
+    X_train, X_test, y_train, y_test = train_test_split(embeddings, labels, test_size=0.2, random_state=42)
+    print X_train.shape, X_test.shape
+    #cPickle.dump([X_train, X_test, y_train, y_test], open('../Data/mean_embeddings.pkl', 'wb'))
+
+    # Run the classification algorithm
+    results = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
+    y_predicted = classify(args.algorithm, X_train, y_train, X_test, y_test, results)
+    cm = confusion_matrix(y_test, y_predicted)
+
+    # Cross-validation
+    # for k, (train, test) in enumerate(KFold(3).split(embeddings, labels)):
+    #    X_train, X_test, y_train, y_test = embeddings[train], embeddings[test], labels[train], labels[test]
+    #    print classify(algorithm, X_train, y_train, X_test, y_test, results)
+
+    if args.plot_confusion_matrix == 'True':
+        plot = plot_confusion_matrix(cm, classes=np.arange(33), normalize=True, title='Confusion matrix')
+        plot.show()

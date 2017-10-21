@@ -18,8 +18,8 @@ categories = ['Roxy-Composition-Internet','Hotel-Location','Roxy-About-Sports','
             #'Roxy-Composition-Language','Roxy-Composition-Durability','Hotel-Knowledge','Roxy-Power-Sleep','Roxy-History-Being_in_Room','Roxy-Power-General','Roxy-About-Naming',
             #'Conversation-Other_Persons','Roxy-Power-Battery','Roxy-Function-Boss','Roxy-Surveillance-Listening','Roxy-Composition-Cost','Roxy-Surveillance-Spying'
             ]
-# for category in categories:
-#     qtype = qtype[qtype['Qualitative Tag']!=category]
+for category in categories:
+    qtype = qtype[qtype['Qualitative Tag']!=category]
 
 # Turn the varaibles into categorical and then use one-hot encoding
 qtype['qual_cc'] = qtype['Qualitative Tag'].astype('category')

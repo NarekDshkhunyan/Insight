@@ -21,11 +21,12 @@ def classify(method, X_train, y_train, X_test, y_test, results):
         clf = LogisticRegression(C=30.0, class_weight='balanced', solver='newton-cg', multi_class='multinomial', n_jobs=-1, random_state=42)
 
     elif method == "knn":
-        clf = KNeighborsClassifier(n_neighbors=10, algorithm='auto')
-    elif method == "dt":
-        clf = tree.DecisionTreeClassifier(min_samples_split=30)
+        #param_grid = {'n_neighbors' : [2,5,10,15,20,25], 'algorithm': []}
+        #clf = GridSearchCV(KNeighborsClassifier(n_jobs=-1), param_grid)
+        clf = KNeighborsClassifier(n_neighbors=5, weights='distance', n_jobs=-1)
+
     elif method == "rf":
-        clf = RandomForestClassifier(n_estimators=100, max_features='sqrt', oob_score=True, n_jobs=-1, random_state=42)
+        clf = RandomForestClassifier(max_depth=50, n_estimators=15, min_samples_leaf=2, max_features='sqrt', oob_score=True, n_jobs=-1, random_state=42)
 
     # Fit the model and predict labels
     clf = clf.fit(X_train, y_train)

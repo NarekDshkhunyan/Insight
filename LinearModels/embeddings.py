@@ -39,7 +39,7 @@ def mean_embedding_vectorizer(sentences, model, tfidf_vec):
     #return np.stack([np.mean([model[word] for word in sentence if word in model] or [np.zeros(k)]) for sentence in sentences])
 
 
-def avg_feature_vector(sentences, model, k):
+def concat_feature_vector(sentences, model, k):
     """ Concatenates all words vector in a given sentence """
 
     return np.stack([np.stack([model[word] if word in model else np.zeros(k) for word in sentence]) for sentence in sentences]) # np.random.uniform(-0.25, 0.25, k)
